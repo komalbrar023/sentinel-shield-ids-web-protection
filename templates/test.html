@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Threat Testing - Sentinel Shield</title>
+
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+        }
+
+        .header {
+            background: #111827;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .description {
+            color: #94a3b8;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        a {
+            display: block;
+            padding: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .medium {
+            background: #d97706;
+        }
+
+        .high {
+            background: #dc2626;
+        }
+
+        .dashboard {
+            background: #2563eb;
+        }
+
+        .alerts {
+            background: #7c3aed;
+        }
+
+        a:hover {
+            opacity: 0.85;
+        }
+
+        .warning {
+            background: #172033;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-top: 20px;
+            color: #cbd5e1;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>🧪 Sentinel Shield Threat Testing</h1>
+
+    <p>Local security detection testing panel</p>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="card">
+
+        <h2>🟠 Medium Threat Tests</h2>
+
+        <p class="description">
+            These requests simulate commonly targeted administrative paths.
+        </p>
+
+        <div class="buttons">
+
+            <a class="medium" href="/admin">
+                Test /admin
+            </a>
+
+            <a class="medium" href="/wp-admin">
+                Test /wp-admin
+            </a>
+
+            <a class="medium" href="/phpmyadmin">
+                Test /phpmyadmin
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>🔴 High Threat Test</h2>
+
+        <p class="description">
+            This request simulates a path containing a sensitive system-file pattern.
+        </p>
+
+        <div class="buttons">
+
+            <a class="high" href="/etc/passwd">
+                Test /etc/passwd
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>📊 Monitoring</h2>
+
+        <div class="buttons">
+
+            <a class="dashboard" href="/">
+                Open Dashboard
+            </a>
+
+            <a class="alerts" href="/alerts">
+                View Security Alerts
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="warning">
+
+        ⚠️ <strong>Testing Scope:</strong>
+        These tests are intended only for the local Sentinel Shield
+        application running on 127.0.0.1.
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

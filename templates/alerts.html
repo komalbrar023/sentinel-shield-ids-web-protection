@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Security Alerts - Sentinel Shield</title>
+
+    <link rel="icon"
+          type="image/svg+xml"
+          href="{{ url_for('static', filename='favicon.svg') }}">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            background: #0f172a;
+
+            color: white;
+
+            margin: 0;
+
+        }
+
+
+        /* HEADER */
+
+        .header {
+
+            background: #111827;
+
+            padding: 30px 20px;
+
+            text-align: center;
+
+            border-bottom: 1px solid #334155;
+
+        }
+
+
+        .header h1 {
+
+            margin: 0 0 8px;
+
+            font-size: 30px;
+
+        }
+
+
+        .header p {
+
+            color: #94a3b8;
+
+            margin: 0;
+
+        }
+
+
+        /* MAIN CONTAINER */
+
+        .container {
+
+            width: 90%;
+
+            max-width: 1100px;
+
+            margin: 30px auto;
+
+        }
+
+
+        /* NAVIGATION */
+
+        .navigation {
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .navigation a {
+
+            display: inline-block;
+
+            padding: 10px 16px;
+
+            background: #1e293b;
+
+            color: #60a5fa;
+
+            text-decoration: none;
+
+            border-radius: 6px;
+
+        }
+
+
+        .navigation a:hover {
+
+            background: #334155;
+
+        }
+
+
+        /* SUMMARY */
+
+        .summary {
+
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .summary-card {
+
+            background: #1e293b;
+
+            padding: 20px;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            border: 1px solid #334155;
+
+        }
+
+
+        .summary-card h3 {
+
+            margin: 0 0 8px;
+
+            font-size: 15px;
+
+            color: #94a3b8;
+
+        }
+
+
+        .summary-card strong {
+
+            font-size: 28px;
+
+        }
+
+
+        /* ALERT CARD */
+
+        .alert {
+
+            background: #1e293b;
+
+            padding: 20px;
+
+            margin-bottom: 15px;
+
+            border-radius: 10px;
+
+            border-left: 5px solid #64748b;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+        }
+
+
+        .alert:hover {
+
+            background: #243247;
+
+        }
+
+
+        .high {
+
+            border-left-color: #ef4444;
+
+        }
+
+
+        .medium {
+
+            border-left-color: #f59e0b;
+
+        }
+
+
+        .low {
+
+            border-left-color: #22c55e;
+
+        }
+
+
+        /* SEVERITY */
+
+        .severity {
+
+            font-weight: bold;
+
+            font-size: 15px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .high-text {
+
+            color: #ef4444;
+
+        }
+
+
+        .medium-text {
+
+            color: #f59e0b;
+
+        }
+
+
+        .low-text {
+
+            color: #22c55e;
+
+        }
+
+
+        .unclassified-text {
+
+            color: #94a3b8;
+
+        }
+
+
+        /* ALERT CONTENT */
+
+        .alert-content {
+
+            color: #cbd5e1;
+
+            line-height: 1.7;
+
+            word-break: break-word;
+
+            font-family: monospace;
+
+            font-size: 13px;
+
+        }
+
+
+        /* SECTION TITLE */
+
+        .section-title {
+
+            margin-bottom: 18px;
+
+            color: #e2e8f0;
+
+        }
+
+
+        /* EMPTY STATE */
+
+        .no-alerts {
+
+            background: #1e293b;
+
+            padding: 30px;
+
+            text-align: center;
+
+            border-radius: 10px;
+
+            border-left: 5px solid #22c55e;
+
+        }
+
+
+        /* RESPONSIVE */
+
+        @media (max-width: 700px) {
+
+            .summary {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .header h1 {
+
+                font-size: 24px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>🚨 Sentinel Shield Security Alerts</h1>
+
+    <p>Detected suspicious activity and security events</p>
+
+</div>
+
+
+<div class="container">
+
+
+    <!-- NAVIGATION -->
+
+    <div class="navigation">
+
+        <a href="/">← Back to Dashboard</a>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+        <div class="summary-card">
+
+            <h3>Total Alerts</h3>
+
+            <strong>{{ alerts|length }}</strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>Monitoring Status</h3>
+
+            <strong>🟢</strong>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>Detection</h3>
+
+            <strong>ON</strong>
+
+        </div>
+
+    </div>
+
+
+    <h2 class="section-title">
+
+        Security Event Log
+
+    </h2>
+
+
+    {% if alerts %}
+
+{% for alert in alerts %}
+
+    {% if "Severity=HIGH" in alert %}
+
+        <div class="alert high">
+
+            <div class="severity high-text">
+                🔴 HIGH SEVERITY
+            </div>
+
+            <div class="alert-content">
+
+                <div><strong>🕒 Time:</strong>
+                    {{ alert.split(" | ")[0] }}
+                </div>
+
+                <div><strong>⚠️ Event:</strong>
+                    SUSPICIOUS_REQUEST
+                </div>
+
+                <div><strong>🌐 IP Address:</strong>
+                    127.0.0.1
+                </div>
+
+                <div><strong>🔍 Details:</strong>
+                    {{ alert.split("Details=")[1] if "Details=" in alert else "N/A" }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+    {% elif "Severity=MEDIUM" in alert %}
+
+        <div class="alert medium">
+
+            <div class="severity medium-text">
+                🟠 MEDIUM SEVERITY
+            </div>
+
+            <div class="alert-content">
+
+                <div><strong>🕒 Time:</strong>
+                    {{ alert.split(" | ")[0] }}
+                </div>
+
+                <div><strong>⚠️ Event:</strong>
+                    SUSPICIOUS_REQUEST
+                </div>
+
+                <div><strong>🌐 IP Address:</strong>
+                    127.0.0.1
+                </div>
+
+                <div><strong>🔍 Details:</strong>
+                    {{ alert.split("Details=")[1] if "Details=" in alert else "N/A" }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+    {% else %}
+
+        <div class="alert">
+
+            <div class="severity unclassified-text">
+                ⚪ UNCLASSIFIED
+            </div>
+
+            <div class="alert-content">
+
+                <div><strong>🕒 Time:</strong>
+                    {{ alert.split(" | ")[0] }}
+                </div>
+
+                <div><strong>⚠️ Event:</strong>
+                    SUSPICIOUS_REQUEST
+                </div>
+
+                <div><strong>🌐 IP Address:</strong>
+                     {{ alert.split("IP=")[1].split(" | ")[0] if "IP=" in alert else "Unknown" }}
+                </div>
+
+                <div><strong>🔍 Details:</strong>
+                    {{ alert.split("Details=")[1] if "Details=" in alert else "N/A" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+{% endfor %}
+
+    {% else %}
+
+
+        <div class="no-alerts">
+
+            <div class="severity low-text">
+
+                🟢 NO ALERTS
+
+            </div>
+
+            No suspicious activity detected.
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+</body>
+
+</html>

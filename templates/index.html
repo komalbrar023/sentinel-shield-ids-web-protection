@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sentinel Shield Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+        }
+
+
+        .header {
+            background: #111827;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+
+        .header p {
+            color: #94a3b8;
+        }
+
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+
+        .status {
+            background: #132e24;
+            border: 1px solid #22c55e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+
+        .card h3 {
+            color: #94a3b8;
+            margin-top: 0;
+        }
+
+
+        .number {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+
+        .threat-high {
+            border: 1px solid #ef4444;
+        }
+
+
+        .threat-high .number {
+            color: #ef4444;
+        }
+
+
+        .threat-medium {
+            border: 1px solid #f59e0b;
+        }
+
+
+        .threat-medium .number {
+            color: #f59e0b;
+        }
+
+
+        .threat-low {
+            border: 1px solid #22c55e;
+        }
+
+
+        .threat-low .number {
+            color: #22c55e;
+        }
+
+
+        .section {
+            background: #1e293b;
+            padding: 25px;
+            margin-top: 25px;
+            border-radius: 10px;
+        }
+
+
+        .ip-box {
+            background: #0f172a;
+            border: 1px solid #475569;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+
+
+        .features li {
+            margin: 12px 0;
+        }
+
+
+        .alerts-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #dc2626;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+/* ==========================================
+   THREAT DISTRIBUTION
+   ========================================== */
+
+.threat-distribution {
+    margin-top: 20px;
+}
+
+.threat-row {
+    margin-bottom: 20px;
+}
+
+.threat-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.threat-label strong {
+    font-size: 16px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    min-width: 0;
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+.high-progress {
+    background: #dc3545;
+}
+
+.medium-progress {
+    background: #fd7e14;
+}
+
+.low-progress {
+    background: #28a745;
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>🛡️ Sentinel Shield</h1>
+
+    <p>
+        Advanced Intrusion Detection & Web Protection System
+    </p>
+
+</div>
+
+
+<div class="container">
+
+
+    <!-- SYSTEM STATUS -->
+
+    <div class="status">
+
+        <h2>🟢 System Status: Protected</h2>
+
+        <p>
+            Sentinel Shield monitoring system is active.
+        </p>
+
+    </div>
+
+
+    <!-- MAIN STATISTICS -->
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <h3>Total Requests</h3>
+
+            <div class="number">
+                {{ total_requests }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Security Alerts</h3>
+
+            <div class="number">
+                {{ security_alerts }}
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Threat Detection</h3>
+
+            <div class="number">
+                ON
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Web Protection</h3>
+
+            <div class="number">
+                ACTIVE
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- THREAT SEVERITY -->
+
+    <div class="section">
+
+        <h2>🚨 Threat Severity Summary</h2>
+
+
+        <div class="cards">
+
+
+            <div class="card threat-high">
+
+                <h3>🔴 HIGH THREATS</h3>
+
+                <div class="number">
+                    {{ high_threats }}
+                </div>
+
+            </div>
+
+
+            <div class="card threat-medium">
+
+                <h3>🟠 MEDIUM THREATS</h3>
+
+                <div class="number">
+                    {{ medium_threats }}
+                </div>
+
+            </div>
+
+
+            <div class="card threat-low">
+
+                <h3>🟢 LOW THREATS</h3>
+
+                <div class="number">
+                    {{ low_threats }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+<!-- THREAT DISTRIBUTION -->
+
+<div class="section">
+
+    <h2>📊 Threat Distribution</h2>
+
+    <div class="threat-distribution">
+
+        <!-- HIGH -->
+
+        <div class="threat-row">
+
+            <div class="threat-label">
+                <span>🔴 HIGH</span>
+                <strong>{{ high_threats }}</strong>
+            </div>
+
+            <div class="progress-track">
+
+                <div class="progress-bar high-progress"
+                     style="width: {{ high_threats * 20 }}px;">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MEDIUM -->
+
+        <div class="threat-row">
+
+            <div class="threat-label">
+                <span>🟠 MEDIUM</span>
+                <strong>{{ medium_threats }}</strong>
+            </div>
+
+            <div class="progress-track">
+
+                <div class="progress-bar medium-progress"
+                     style="width: {{ medium_threats * 20 }}px;">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOW -->
+
+        <div class="threat-row">
+
+            <div class="threat-label">
+                <span>🟢 LOW</span>
+                <strong>{{ low_threats }}</strong>
+            </div>
+
+            <div class="progress-track">
+
+                <div class="progress-bar low-progress"
+                     style="width: {{ low_threats * 20 }}px;">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+    <!-- SUSPICIOUS IP ADDRESSES -->
+
+    <div class="section">
+
+        <h2>🚨 Suspicious IP Addresses</h2>
+
+
+        {% if ip_alerts %}
+
+
+            {% for ip, count in ip_alerts.items() %}
+
+                <div class="ip-box">
+
+                    <strong>IP Address:</strong>
+                    {{ ip }}
+
+                    <br>
+
+                    <strong>Security Alerts:</strong>
+                    {{ count }}
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <p>
+                ✅ No suspicious IP addresses detected.
+            </p>
+
+        {% endif %}
+
+
+    </div>
+
+<!-- RECENT SECURITY EVENTS -->
+
+<div class="section">
+
+    <h2>🕒 Recent Security Events</h2>
+
+    {% if recent_events %}
+
+        {% for event in recent_events %}
+
+            <div class="ip-box">
+
+                {% if "Severity=HIGH" in event %}
+                    <strong>🔴 HIGH</strong>
+
+                {% elif "Severity=MEDIUM" in event %}
+                    <strong>🟠 MEDIUM</strong>
+
+                {% elif "Severity=LOW" in event %}
+                    <strong>🟢 LOW</strong>
+
+                {% else %}
+                    <strong>⚪ UNCLASSIFIED</strong>
+
+                {% endif %}
+
+                <br><br>
+
+                {{ event }}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>✅ No security events recorded.</p>
+
+    {% endif %}
+
+</div>
+
+    <!-- SECURITY FEATURES -->
+
+    <div class="section features">
+
+        <h2>Security Features</h2>
+
+
+        <ul>
+
+            <li>✅ HTTP Request Monitoring</li>
+
+            <li>✅ IP Address Logging</li>
+
+            <li>✅ Suspicious URL Detection</li>
+
+            <li>✅ Security Event Logging</li>
+
+            <li>✅ IP-Based Threat Tracking</li>
+
+            <li>✅ Threat Severity Classification</li>
+
+            <li>✅ Intrusion Detection</li>
+
+            <li>✅ Web Protection</li>
+
+        </ul>
+
+
+        <a class="alerts-button" href="/alerts">
+
+            🚨 View Security Alerts
+
+        </a>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

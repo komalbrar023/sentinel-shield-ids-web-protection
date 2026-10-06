@@ -1,6 +1,6 @@
 import logging
 import os
-
+from urllib.parse import unquote
 LOG_DIR = "logs"
 LOG_FILE = os.path.join(LOG_DIR, "security.log")
 
@@ -37,7 +37,10 @@ def get_threat_severity(pattern):
         "union select",
         "' or '1'='1",
         "<script>",
-        "etc/passwd"
+        "etc/passwd",
+        "; whoami",
+        "&& whoami",
+        "| whoami"
     ]
 
     medium_patterns = [
@@ -72,29 +75,43 @@ def log_security_event(event_type, ip_address, details, severity="LOW"):
 
     logger.warning(message)
 
-
 def detect_suspicious_request(path):
 
     suspicious_patterns = [
-        "/admin",
-        "/login",
-        "/wp-admin",
-        "/phpmyadmin",
-        "union select",
-        "' or '1'='1",
-        "../",
-        "<script>",
-        "etc/passwd"
+
+        # SQL Injection
+        ("union select", "SQL Injection"),
+        ("' or '1'='1", "SQL Injection"),
+
+        # Cross-Site Scripting
+        ("<script>", "Cross-Site Scripting"),
+
+        # Directory Traversal
+        ("../", "Directory Traversal"),
+
+        # Local File Inclusion
+        ("etc/passwd", "Local File Inclusion"),
+
+        # Command Injection
+        ("; whoami", "Command Injection"),
+        ("&& whoami", "Command Injection"),
+        ("| whoami", "Command Injection"),
+       
+         # Suspicious administrative access
+        ("/admin", "Suspicious Administrative Access"),
+        ("/login", "Suspicious Login Access"),
+        ("/wp-admin", "Suspicious Administrative Access"),
+        ("/phpmyadmin", "Suspicious Database Access")
     ]
 
-    path_lower = path.lower()
+    path_lower = unquote(path).lower()
 
-    for pattern in suspicious_patterns:
+    for pattern, category in suspicious_patterns:
 
         if pattern in path_lower:
 
             severity = get_threat_severity(pattern)
 
-            return True, pattern, severity
+            return True, pattern, severity, category
 
-    return False, None, None
+    return False, None, None, None

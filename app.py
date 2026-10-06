@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-
+import time
 from modules.security_logger import (
     log_request,
     log_security_event,
@@ -10,25 +10,72 @@ app = Flask(__name__)
 
 
 # ==========================================
+# RATE LIMITING
+# ==========================================
+
+request_history = {}
+
+RATE_LIMIT = 10
+RATE_WINDOW = 10
+
+def check_rate_limit(ip_address):
+
+    current_time = time.time()
+
+    if ip_address not in request_history:
+        request_history[ip_address] = []
+
+    request_history[ip_address] = [
+        timestamp
+        for timestamp in request_history[ip_address]
+        if current_time - timestamp < RATE_WINDOW
+    ]
+
+    if len(request_history[ip_address]) >= RATE_LIMIT:
+        return True
+
+    request_history[ip_address].append(current_time)
+
+    return False
+
+# ==========================================
 # REQUEST MONITORING
 # ==========================================
 
 @app.before_request
 def monitor_request():
 
-    suspicious, pattern, severity = detect_suspicious_request(
-        request.path
-    )
+    ip_address = request.remote_addr
 
-    if suspicious:
+    # Ignore static files
+    if request.path.startswith("/static/"):
+        return
+
+    # Check request rate
+    if check_rate_limit(ip_address):
+
+        log_security_event(
+            "RATE_LIMIT_EXCEEDED",
+            ip_address,
+            f"More than {RATE_LIMIT} requests within {RATE_WINDOW} seconds | Path: {request.path}",
+            "HIGH"
+        )
+
+        return "Too Many Requests - Rate limit exceeded", 429
+
+    request_data = request.path + "?" + request.query_string.decode()
+
+    is_suspicious, pattern, severity, category = detect_suspicious_request(request_data)
+
+    if is_suspicious:
 
         log_security_event(
             "SUSPICIOUS_REQUEST",
-            request.remote_addr,
-            f"Pattern detected: {pattern} | Path: {request.path}",
+            ip_address,
+            f"Category={category} | Pattern detected: {pattern} | Path: {request.path}",
             severity
         )
-
+        return "Request blocked by Sentinel Shield", 403
 
 # ==========================================
 # REQUEST LOGGING
@@ -61,7 +108,8 @@ def home():
     high_threats = 0
     medium_threats = 0
     low_threats = 0
-
+    
+    category_counts = {}
     try:
 
         with open("logs/security.log", "r") as log_file:
@@ -77,6 +125,13 @@ def home():
 
                     security_alerts += 1
 
+                    if "Category=" in line:
+                        category = line.split("Category=")[1].split("|")[0].strip()
+
+                        category_counts[category] = (
+                            category_counts.get(category, 0) + 1
+                        )
+
                     # Count threat severity
                     if "Severity=HIGH" in line:
                         high_threats += 1
@@ -86,7 +141,6 @@ def home():
 
                     elif "Severity=LOW" in line:
                         low_threats += 1
-
                     # Extract IP address
                     parts = line.split("|")
 
@@ -141,6 +195,8 @@ def home():
         medium_threats=medium_threats,
 
         low_threats=low_threats,
+
+        category_counts=category_counts,
 
         recent_events=recent_events[-5:]
     )
